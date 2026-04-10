@@ -22,27 +22,10 @@ interface NavItemDef {
   Icon:   LucideIcon;
   label:  string;
   href:   string;
-<<<<<<< HEAD
-  view?:  string;
-=======
->>>>>>> 9fc5f84 (frontend landing page)
   badge?: string | null;
 }
 
 const MENU: NavItemDef[] = [
-<<<<<<< HEAD
-  { Icon: LayoutDashboard, label: 'Dashboard',          href: '/dashboard',        view: 'dashboard', badge: null  },
-  { Icon: PlayCircle,      label: 'Practice Sessions',  href: '/dashboard?view=practice', view: 'practice',  badge: '12+' },
-  { Icon: Calendar,        label: 'Calendar',           href: '/dashboard?view=calendar', view: 'calendar',  badge: null  },
-  { Icon: BarChart2,       label: 'Performance Insights',href: '/dashboard?view=insights', view: 'insights', badge: null  },
-  { Icon: BookOpen,        label: 'Interview Library',  href: '/dashboard?view=library',  view: 'library',  badge: null  },
-];
-
-const GENERAL: NavItemDef[] = [
-  { Icon: Settings,   label: 'Settings', href: '#', view: 'settings' },
-  { Icon: HelpCircle, label: 'Help',     href: '#', view: 'help' },
-  { Icon: LogOut,     label: 'Logout',   href: '/', view: 'logout' },
-=======
   { Icon: LayoutDashboard, label: 'Dashboard',          href: '/dashboard', badge: null  },
   { Icon: PlayCircle,      label: 'Practice Sessions',  href: '#',          badge: '12+' },
   { Icon: Calendar,        label: 'Calendar',           href: '#',          badge: null  },
@@ -54,52 +37,34 @@ const GENERAL: NavItemDef[] = [
   { Icon: Settings,   label: 'Settings', href: '#' },
   { Icon: HelpCircle, label: 'Help',     href: '#' },
   { Icon: LogOut,     label: 'Logout',   href: '/' },
->>>>>>> 9fc5f84 (frontend landing page)
 ];
 
 interface SidebarProps {
   collapsed: boolean;
   onToggle:  () => void;
   dark:      boolean;
-<<<<<<< HEAD
-  activeView: string;
-=======
->>>>>>> 9fc5f84 (frontend landing page)
 }
 
 export default function DashboardSidebar({
   collapsed,
   onToggle,
   dark,
-<<<<<<< HEAD
-  activeView,
-}: SidebarProps) {
-=======
 }: SidebarProps) {
   const [active, setActive] = useState('Dashboard');
 
->>>>>>> 9fc5f84 (frontend landing page)
   const bg      = dark ? '#161b27' : '#fff';
   const border  = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)';
   const textSub = dark ? '#475569' : '#9ca3af';
   const textNav = dark ? '#94a3b8' : '#6b7280';
   const accent  = '#16a34a';
 
-<<<<<<< HEAD
-  function NavItem({ Icon, label, href, view, badge }: NavItemDef) {
-    const isActive = activeView === view;
-=======
   function NavItem({ Icon, label, href, badge }: NavItemDef) {
     const isActive = active === label;
->>>>>>> 9fc5f84 (frontend landing page)
     return (
       <Link href={href} style={{ textDecoration: 'none' }}>
         <motion.div
           whileHover={{ x: collapsed ? 0 : 3 }}
-<<<<<<< HEAD
-=======
           onClick={() => setActive(label)}
->>>>>>> 9fc5f84 (frontend landing page)
           title={collapsed ? label : undefined}
           style={{
             display:        'flex',
@@ -119,10 +84,7 @@ export default function DashboardSidebar({
             transition:     'all 0.2s',
           }}
         >
-<<<<<<< HEAD
-=======
           {/* ✅ Correct pattern for dynamic Lucide icons */}
->>>>>>> 9fc5f84 (frontend landing page)
           <Icon
             size={18}
             style={{ color: isActive ? accent : textNav, flexShrink: 0 }}
