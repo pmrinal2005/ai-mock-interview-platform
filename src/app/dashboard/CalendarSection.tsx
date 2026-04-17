@@ -163,7 +163,11 @@ const TYPE_CONFIG: Record<
 > = {
   Technical: { color: '#2563eb', icon: Code, bg: 'rgba(37,99,235,0.14)' },
   Behavioral: { color: '#f59e0b', icon: Users, bg: 'rgba(245,158,11,0.14)' },
-  'System Design': { color: '#8b5cf6', icon: Brain, bg: 'rgba(139,92,246,0.14)' },
+  'System Design': {
+    color: '#8b5cf6',
+    icon: Brain,
+    bg: 'rgba(139,92,246,0.14)',
+  },
   HR: { color: '#16a34a', icon: Sparkles, bg: 'rgba(22,163,74,0.14)' },
 };
 
@@ -184,10 +188,12 @@ type BookingForm = {
 export default function CalendarSection({ dark }: Props) {
   const todayStr = useMemo(() => formatDateLocal(new Date()), []);
 
-  const [currentDate, setCurrentDate] = useState<Date>(() => parseYYYYMMDD(todayStr));
+  const [currentDate, setCurrentDate] = useState<Date>(() =>
+    parseYYYYMMDD(todayStr)
+  );
   const [selectedDate, setSelectedDate] = useState<string>(() => todayStr);
 
-  // interviews are STATE now (so booking actually updates the calendar)
+  // interviews are STATE now (so booking updates the calendar)
   const [interviews, setInterviews] = useState<Interview[]>(() => MOCK_INTERVIEWS);
 
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -200,6 +206,15 @@ export default function CalendarSection({ dark }: Props) {
     date: todayStr,
     time: '10:00',
   });
+
+  // Responsive: stack modal grid on narrow screens
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const onResize = () => setIsNarrow(window.innerWidth < 640);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Reset modal form when opening
   useEffect(() => {
@@ -264,7 +279,6 @@ export default function CalendarSection({ dark }: Props) {
     for (const i of interviews) {
       (map[i.date] ??= []).push(i);
     }
-    // sort each day by time
     for (const k of Object.keys(map)) {
       map[k].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
     }
@@ -282,7 +296,10 @@ export default function CalendarSection({ dark }: Props) {
     });
   };
 
-  const selectedDateObj = useMemo(() => parseYYYYMMDD(selectedDate), [selectedDate]);
+  const selectedDateObj = useMemo(
+    () => parseYYYYMMDD(selectedDate),
+    [selectedDate]
+  );
 
   const computeStatus = (dateStr: string, time24: string): Interview['status'] => {
     const now = new Date();
@@ -291,13 +308,11 @@ export default function CalendarSection({ dark }: Props) {
     d.setHours(hh || 0, mm || 0, 0, 0);
 
     const diff = d.getTime() - now.getTime();
-    if (diff < 0) return 'Scheduled'; // keep it simple; user can mark completed elsewhere
-    // "Upcoming" if within next 24 hours
+    if (diff < 0) return 'Scheduled';
     return diff <= 24 * 60 * 60 * 1000 ? 'Upcoming' : 'Scheduled';
   };
 
   const handleSchedule = () => {
-    // basic validation
     if (!form.title.trim()) return;
     if (!form.date) return;
     if (!form.time) return;
@@ -316,7 +331,11 @@ export default function CalendarSection({ dark }: Props) {
 
     setInterviews((prev) => {
       const next = [...prev, newInterview];
-      next.sort((a, b) => (a.date === b.date ? timeToMinutes(a.time) - timeToMinutes(b.time) : a.date.localeCompare(b.date)));
+      next.sort((a, b) =>
+        a.date === b.date
+          ? timeToMinutes(a.time) - timeToMinutes(b.time)
+          : a.date.localeCompare(b.date)
+      );
       return next;
     });
 
@@ -326,7 +345,6 @@ export default function CalendarSection({ dark }: Props) {
   };
 
   const joinInterview = (intv: Interview) => {
-    // Replace with your real routing/video call logic
     console.log('Join interview:', intv);
   };
 
@@ -337,7 +355,6 @@ export default function CalendarSection({ dark }: Props) {
       style={{
         padding: 28,
         background: pageBg,
-        minHeight: 'calc(100vh - 80px)',
         fontFamily: "'Space Grotesk', sans-serif",
       }}
     >
@@ -412,7 +429,9 @@ export default function CalendarSection({ dark }: Props) {
             background: cardBg,
             border: `1px solid ${border}`,
             padding: 18,
-            boxShadow: dark ? '0 10px 30px rgba(0,0,0,0.35)' : '0 10px 30px rgba(2,6,23,0.08)',
+            boxShadow: dark
+              ? '0 10px 30px rgba(0,0,0,0.35)'
+              : '0 10px 30px rgba(2,6,23,0.08)',
             backdropFilter: 'blur(10px)',
           }}
         >
@@ -445,7 +464,7 @@ export default function CalendarSection({ dark }: Props) {
                 cursor: 'pointer',
               }}
             >
-              <ChevronLeft size={16} style={{ color: sub as string }} />
+              <ChevronLeft size={16} style={{ color: sub }} />
             </motion.button>
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
@@ -463,7 +482,11 @@ export default function CalendarSection({ dark }: Props) {
                   background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(2,6,23,0.03)',
                 }}
               >
-                Today: {parseYYYYMMDD(todayStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                Today:{' '}
+                {parseYYYYMMDD(todayStr).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })}
               </div>
             </div>
 
@@ -485,7 +508,7 @@ export default function CalendarSection({ dark }: Props) {
                 cursor: 'pointer',
               }}
             >
-              <ChevronRight size={16} style={{ color: sub as string }} />
+              <ChevronRight size={16} style={{ color: sub }} />
             </motion.button>
           </div>
 
@@ -563,7 +586,9 @@ export default function CalendarSection({ dark }: Props) {
                     justifyContent: 'space-between',
                     opacity: day.currentMonth ? 1 : 0.45,
                     boxShadow: isSelected
-                      ? (dark ? '0 10px 18px rgba(0,0,0,0.35)' : '0 10px 18px rgba(22,163,74,0.18)')
+                      ? dark
+                        ? '0 10px 18px rgba(0,0,0,0.35)'
+                        : '0 10px 18px rgba(22,163,74,0.18)'
                       : 'none',
                   }}
                   aria-label={`Select ${day.date.toDateString()}`}
@@ -629,7 +654,9 @@ export default function CalendarSection({ dark }: Props) {
                               height: 18,
                               borderRadius: 6,
                               background: isSelected ? 'rgba(255,255,255,0.18)' : cfg.bg,
-                              border: `1px solid ${isSelected ? 'rgba(255,255,255,0.28)' : `${cfg.color}33`}`,
+                              border: `1px solid ${
+                                isSelected ? 'rgba(255,255,255,0.28)' : `${cfg.color}33`
+                              }`,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -701,7 +728,9 @@ export default function CalendarSection({ dark }: Props) {
             background: cardBg,
             border: `1px solid ${border}`,
             padding: 18,
-            boxShadow: dark ? '0 10px 30px rgba(0,0,0,0.35)' : '0 10px 30px rgba(2,6,23,0.08)',
+            boxShadow: dark
+              ? '0 10px 30px rgba(0,0,0,0.35)'
+              : '0 10px 30px rgba(2,6,23,0.08)',
             backdropFilter: 'blur(10px)',
           }}
         >
@@ -747,10 +776,19 @@ export default function CalendarSection({ dark }: Props) {
                         padding: 14,
                         background: dark ? cardBgSolid : '#fff',
                         border: `1px solid ${border}`,
-                        boxShadow: dark ? '0 10px 20px rgba(0,0,0,0.25)' : '0 10px 20px rgba(2,6,23,0.06)',
+                        boxShadow: dark
+                          ? '0 10px 20px rgba(0,0,0,0.25)'
+                          : '0 10px 20px rgba(2,6,23,0.06)',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          marginBottom: 10,
+                        }}
+                      >
                         <div
                           style={{
                             width: 38,
@@ -771,7 +809,9 @@ export default function CalendarSection({ dark }: Props) {
                           <div style={{ color: text, fontSize: 13, fontWeight: 850, marginBottom: 3 }}>
                             {intv.title}
                           </div>
-                          <div style={{ color: sub, fontSize: 11, fontWeight: 650 }}>AI Bot: {intv.aiBot}</div>
+                          <div style={{ color: sub, fontSize: 11, fontWeight: 650 }}>
+                            AI Bot: {intv.aiBot}
+                          </div>
                         </div>
 
                         <div
@@ -804,9 +844,29 @@ export default function CalendarSection({ dark }: Props) {
                         <span style={{ color: text, fontWeight: 850 }}>Focus:</span> {intv.focus}
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: statusColor, fontSize: 10, fontWeight: 900 }}>
-                          {intv.status === 'Completed' ? <CheckCircle size={12} /> : <CalendarIcon size={12} />}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 10,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            color: statusColor,
+                            fontSize: 10,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {intv.status === 'Completed' ? (
+                            <CheckCircle size={12} />
+                          ) : (
+                            <CalendarIcon size={12} />
+                          )}
                           {intv.status}
                           {intv.score !== undefined && ` • Score: ${intv.score}%`}
                         </div>
@@ -829,7 +889,9 @@ export default function CalendarSection({ dark }: Props) {
                               display: 'flex',
                               alignItems: 'center',
                               gap: 6,
-                              boxShadow: dark ? '0 10px 18px rgba(0,0,0,0.35)' : '0 10px 18px rgba(22,163,74,0.18)',
+                              boxShadow: dark
+                                ? '0 10px 18px rgba(0,0,0,0.35)'
+                                : '0 10px 18px rgba(22,163,74,0.18)',
                             }}
                           >
                             <Video size={14} />
@@ -863,8 +925,12 @@ export default function CalendarSection({ dark }: Props) {
                     marginBottom: 12,
                   }}
                 />
-                <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 6 }}>No interviews scheduled</div>
-                <div style={{ fontSize: 11, fontWeight: 650 }}>Use “Book AI Interview” to add one for this day.</div>
+                <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 6 }}>
+                  No interviews scheduled
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 650 }}>
+                  Use “Book AI Interview” to add one for this day.
+                </div>
 
                 <motion.button
                   type="button"
@@ -887,7 +953,11 @@ export default function CalendarSection({ dark }: Props) {
                   }}
                 >
                   <Plus size={14} />
-                  Book for {selectedDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  Book for{' '}
+                  {selectedDateObj.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </motion.button>
               </motion.div>
             )}
@@ -895,7 +965,7 @@ export default function CalendarSection({ dark }: Props) {
         </div>
       </div>
 
-      {/* Booking Modal */}
+      {/* ✅ Booking Modal (FIXED: scroll-safe, header/footer sticky inside modal) */}
       <AnimatePresence>
         {showBookingModal && (
           <motion.div
@@ -907,11 +977,16 @@ export default function CalendarSection({ dark }: Props) {
               inset: 0,
               background: 'rgba(0,0,0,0.62)',
               backdropFilter: 'blur(6px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 16,
               zIndex: 1000,
+
+              // ✅ allow scrolling if modal is taller than viewport
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              padding: 16,
             }}
             onClick={() => setShowBookingModal(false)}
           >
@@ -926,17 +1001,26 @@ export default function CalendarSection({ dark }: Props) {
                 borderRadius: 22,
                 background: dark ? '#0b1220' : '#ffffff',
                 border: `1px solid ${border}`,
-                padding: 18,
                 boxShadow: '0 20px 70px rgba(0,0,0,0.55)',
+
+                // ✅ keep within screen height; body scrolls
+                maxHeight: 'calc(100vh - 32px)',
+
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
               }}
             >
+              {/* Header */}
               <div
                 style={{
+                  padding: 18,
+                  paddingBottom: 12,
+                  borderBottom: `1px solid ${border}`,
                   display: 'flex',
                   alignItems: 'flex-start',
                   justifyContent: 'space-between',
                   gap: 10,
-                  marginBottom: 14,
                 }}
               >
                 <div>
@@ -964,291 +1048,319 @@ export default function CalendarSection({ dark }: Props) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
+                    flexShrink: 0,
                   }}
                 >
-                  <X size={16} style={{ color: sub as string }} />
+                  <X size={16} style={{ color: sub }} />
                 </motion.button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {/* Title */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    Session title *
-                  </label>
-                  <input
-                    value={form.title}
-                    onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                    placeholder="e.g. Frontend mock interview (React)"
-                    style={{
-                      width: '100%',
-                      padding: '11px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 12,
-                      outline: 'none',
-                      fontWeight: 700,
-                    }}
-                  />
-                </div>
+              {/* Body (scrollable) */}
+              <div
+                style={{
+                  padding: 18,
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr',
+                    gap: 12,
+                  }}
+                >
+                  {/* Title */}
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      Session title *
+                    </label>
+                    <input
+                      value={form.title}
+                      onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                      placeholder="e.g. Frontend mock interview (React)"
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        borderRadius: 14,
+                        background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
+                        border: `1px solid ${border}`,
+                        color: text,
+                        fontSize: 12,
+                        outline: 'none',
+                        fontWeight: 700,
+                      }}
+                    />
+                  </div>
 
-                {/* Interview Type */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    Interview type
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-                    {(Object.keys(TYPE_CONFIG) as Interview['type'][]).map((type) => {
-                      const cfg = TYPE_CONFIG[type];
-                      const Icon = cfg.icon;
-                      const active = form.type === type;
+                  {/* Interview Type */}
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      Interview type
+                    </label>
 
-                      return (
-                        <motion.button
-                          type="button"
-                          key={type}
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setForm((p) => ({ ...p, type }))}
-                          aria-pressed={active}
-                          style={{
-                            padding: '12px',
-                            borderRadius: 16,
-                            background: active
-                              ? `linear-gradient(135deg, ${cfg.bg}, ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.7)'})`
-                              : dark
-                              ? 'rgba(255,255,255,0.04)'
-                              : 'rgba(2,6,23,0.03)',
-                            border: active ? `1px solid ${cfg.color}66` : `1px solid ${border}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
-                        >
-                          <div
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: isNarrow ? '1fr' : 'repeat(2, 1fr)',
+                        gap: 8,
+                      }}
+                    >
+                      {(Object.keys(TYPE_CONFIG) as Interview['type'][]).map((type) => {
+                        const cfg = TYPE_CONFIG[type];
+                        const Icon = cfg.icon;
+                        const active = form.type === type;
+
+                        return (
+                          <motion.button
+                            type="button"
+                            key={type}
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setForm((p) => ({ ...p, type }))}
+                            aria-pressed={active}
                             style={{
-                              width: 30,
-                              height: 30,
-                              borderRadius: 12,
-                              background: cfg.bg,
-                              border: `1px solid ${cfg.color}33`,
+                              padding: '12px',
+                              borderRadius: 16,
+                              background: active
+                                ? `linear-gradient(135deg, ${cfg.bg}, ${
+                                    dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.7)'
+                                  })`
+                                : dark
+                                ? 'rgba(255,255,255,0.04)'
+                                : 'rgba(2,6,23,0.03)',
+                              border: active ? `1px solid ${cfg.color}66` : `1px solid ${border}`,
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
+                              gap: 10,
+                              cursor: 'pointer',
+                              textAlign: 'left',
                             }}
                           >
-                            <Icon size={15} style={{ color: cfg.color }} />
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <span style={{ color: text, fontSize: 12, fontWeight: 900 }}>{type}</span>
-                            <span style={{ color: sub, fontSize: 10, fontWeight: 700 }}>
-                              {type === 'Technical'
-                                ? 'Coding + fundamentals'
-                                : type === 'Behavioral'
-                                ? 'Stories + communication'
-                                : type === 'System Design'
-                                ? 'Architecture + tradeoffs'
-                                : 'HR + career goals'}
-                            </span>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
+                            <div
+                              style={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: 12,
+                                background: cfg.bg,
+                                border: `1px solid ${cfg.color}33`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Icon size={15} style={{ color: cfg.color }} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ color: text, fontSize: 12, fontWeight: 900 }}>{type}</span>
+                              <span style={{ color: sub, fontSize: 10, fontWeight: 700 }}>
+                                {type === 'Technical'
+                                  ? 'Coding + fundamentals'
+                                  : type === 'Behavioral'
+                                  ? 'Stories + communication'
+                                  : type === 'System Design'
+                                  ? 'Architecture + tradeoffs'
+                                  : 'HR + career goals'}
+                              </span>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* AI Interviewer */}
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      AI interviewer
+                    </label>
+                    <select
+                      value={form.aiBot}
+                      onChange={(e) => setForm((p) => ({ ...p, aiBot: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        borderRadius: 14,
+                        background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
+                        border: `1px solid ${border}`,
+                        color: text,
+                        fontSize: 12,
+                        outline: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 750,
+                      }}
+                    >
+                      <option>Zeta - Technical Specialist</option>
+                      <option>Alpha - Behavioral Coach</option>
+                      <option>Omega - System Design Expert</option>
+                      <option>Beta - HR Interviewer</option>
+                    </select>
+                  </div>
+
+                  {/* Date */}
+                  <div>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      min={todayStr}
+                      value={form.date}
+                      onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        borderRadius: 14,
+                        background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
+                        border: `1px solid ${border}`,
+                        color: text,
+                        fontSize: 12,
+                        outline: 'none',
+                        fontWeight: 750,
+                      }}
+                    />
+                  </div>
+
+                  {/* Time */}
+                  <div>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      value={form.time}
+                      onChange={(e) => setForm((p) => ({ ...p, time: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        borderRadius: 14,
+                        background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
+                        border: `1px solid ${border}`,
+                        color: text,
+                        fontSize: 12,
+                        outline: 'none',
+                        fontWeight: 750,
+                      }}
+                    />
+                  </div>
+
+                  {/* Duration */}
+                  <div>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      Duration
+                    </label>
+                    <select
+                      value={form.duration}
+                      onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        borderRadius: 14,
+                        background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
+                        border: `1px solid ${border}`,
+                        color: text,
+                        fontSize: 12,
+                        outline: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 750,
+                      }}
+                    >
+                      <option>25 min</option>
+                      <option>30 min</option>
+                      <option>40 min</option>
+                      <option>45 min</option>
+                      <option>60 min</option>
+                    </select>
+                  </div>
+
+                  {/* Focus */}
+                  <div>
+                    <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
+                      Focus (optional)
+                    </label>
+                    <input
+                      value={form.focus}
+                      onChange={(e) => setForm((p) => ({ ...p, focus: e.target.value }))}
+                      placeholder="e.g. caching, hooks, STAR answers"
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        borderRadius: 14,
+                        background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
+                        border: `1px solid ${border}`,
+                        color: text,
+                        fontSize: 12,
+                        outline: 'none',
+                        fontWeight: 750,
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ gridColumn: '1 / -1', color: sub, fontSize: 11, fontWeight: 650 }}>
+                    Note: Booking adds the interview to the calendar immediately (client-side state).
                   </div>
                 </div>
+              </div>
 
-                {/* AI Interviewer */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    AI interviewer
-                  </label>
-                  <select
-                    value={form.aiBot}
-                    onChange={(e) => setForm((p) => ({ ...p, aiBot: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '11px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 12,
-                      outline: 'none',
-                      cursor: 'pointer',
-                      fontWeight: 750,
-                    }}
-                  >
-                    <option>Zeta - Technical Specialist</option>
-                    <option>Alpha - Behavioral Coach</option>
-                    <option>Omega - System Design Expert</option>
-                    <option>Beta - HR Interviewer</option>
-                  </select>
-                </div>
+              {/* Footer */}
+              <div
+                style={{
+                  padding: 18,
+                  paddingTop: 12,
+                  borderTop: `1px solid ${border}`,
+                  display: 'flex',
+                  gap: 10,
+                }}
+              >
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowBookingModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '12px 12px',
+                    borderRadius: 14,
+                    background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.05)',
+                    border: `1px solid ${border}`,
+                    color: text,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </motion.button>
 
-                {/* Date */}
-                <div>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    min={todayStr}
-                    value={form.date}
-                    onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '11px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 12,
-                      outline: 'none',
-                      fontWeight: 750,
-                    }}
-                  />
-                </div>
-
-                {/* Time */}
-                <div>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    Time
-                  </label>
-                  <input
-                    type="time"
-                    value={form.time}
-                    onChange={(e) => setForm((p) => ({ ...p, time: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '11px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 12,
-                      outline: 'none',
-                      fontWeight: 750,
-                    }}
-                  />
-                </div>
-
-                {/* Duration */}
-                <div>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    Duration
-                  </label>
-                  <select
-                    value={form.duration}
-                    onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '11px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 12,
-                      outline: 'none',
-                      cursor: 'pointer',
-                      fontWeight: 750,
-                    }}
-                  >
-                    <option>25 min</option>
-                    <option>30 min</option>
-                    <option>40 min</option>
-                    <option>45 min</option>
-                    <option>60 min</option>
-                  </select>
-                </div>
-
-                {/* Focus */}
-                <div>
-                  <label style={{ color: text, fontSize: 12, fontWeight: 800, display: 'block', marginBottom: 6 }}>
-                    Focus (optional)
-                  </label>
-                  <input
-                    value={form.focus}
-                    onChange={(e) => setForm((p) => ({ ...p, focus: e.target.value }))}
-                    placeholder="e.g. caching, hooks, STAR answers"
-                    style={{
-                      width: '100%',
-                      padding: '11px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.04)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 12,
-                      outline: 'none',
-                      fontWeight: 750,
-                    }}
-                  />
-                </div>
-
-                {/* Actions */}
-                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 10, marginTop: 4 }}>
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowBookingModal(false)}
-                    style={{
-                      flex: 1,
-                      padding: '12px 12px',
-                      borderRadius: 14,
-                      background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(2,6,23,0.05)',
-                      border: `1px solid ${border}`,
-                      color: text,
-                      fontSize: 13,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Cancel
-                  </motion.button>
-
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: form.title.trim() ? 1.01 : 1 }}
-                    whileTap={{ scale: form.title.trim() ? 0.98 : 1 }}
-                    onClick={handleSchedule}
-                    disabled={!form.title.trim()}
-                    style={{
-                      flex: 1.2,
-                      padding: '12px 12px',
-                      borderRadius: 14,
-                      background: form.title.trim()
-                        ? `linear-gradient(135deg, ${accent}, #15803d)`
-                        : dark
-                        ? 'rgba(255,255,255,0.08)'
-                        : 'rgba(2,6,23,0.08)',
-                      border: form.title.trim() ? 'none' : `1px solid ${border}`,
-                      color: form.title.trim() ? '#fff' : sub,
-                      fontSize: 13,
-                      fontWeight: 950,
-                      cursor: form.title.trim() ? 'pointer' : 'not-allowed',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                      boxShadow: form.title.trim()
-                        ? dark
-                          ? '0 14px 26px rgba(0,0,0,0.45)'
-                          : '0 14px 26px rgba(22,163,74,0.18)'
-                        : 'none',
-                    }}
-                  >
-                    <Sparkles size={16} />
-                    Schedule Interview
-                  </motion.button>
-                </div>
-
-                <div style={{ gridColumn: '1 / -1', color: sub, fontSize: 11, fontWeight: 650 }}>
-                  Note: Booking adds the interview to the calendar immediately (client-side state).
-                </div>
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: form.title.trim() ? 1.01 : 1 }}
+                  whileTap={{ scale: form.title.trim() ? 0.98 : 1 }}
+                  onClick={handleSchedule}
+                  disabled={!form.title.trim()}
+                  style={{
+                    flex: 1.2,
+                    padding: '12px 12px',
+                    borderRadius: 14,
+                    background: form.title.trim()
+                      ? `linear-gradient(135deg, ${accent}, #15803d)`
+                      : dark
+                      ? 'rgba(255,255,255,0.08)'
+                      : 'rgba(2,6,23,0.08)',
+                    border: form.title.trim() ? 'none' : `1px solid ${border}`,
+                    color: form.title.trim() ? '#fff' : sub,
+                    fontSize: 13,
+                    fontWeight: 950,
+                    cursor: form.title.trim() ? 'pointer' : 'not-allowed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Sparkles size={16} />
+                  Schedule Interview
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
